@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSH + Tailscale — Beginner's Guide</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface-hover: #222;
+    --border: #2a2a2a;
+    --text: #e0e0e0;
+    --text-muted: #888;
+    --accent: #34d399;
+    --accent-dim: rgba(52, 211, 153, 0.1);
+    --accent-glow: rgba(52, 211, 153, 0.15);
+    --tag-bg: rgba(52, 211, 153, 0.12);
+    --blue: #6c9bff;
+    --blue-dim: rgba(108, 155, 255, 0.1);
+    --orange: #ffb432;
+    --orange-dim: rgba(255, 180, 50, 0.08);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+
+  .header {
+    text-align: center;
+    padding: 2.5rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header .subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .meta-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+    background: var(--tag-bg);
+    color: var(--accent);
+    border-radius: 20px;
+    border: 1px solid rgba(52, 211, 153, 0.15);
+  }
+
+  .roadmap {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+
+  .roadmap-step {
+    font-size: 0.7rem;
+    padding: 0.35rem 0.65rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .roadmap-step.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .section { margin-bottom: 0.75rem; }
+
+  details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  details[open] {
+    border-color: rgba(52, 211, 153, 0.25);
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    list-style: none;
+    user-select: none;
+    transition: background 0.15s;
+  }
+
+  summary:hover { background: var(--surface-hover); }
+  summary::-webkit-details-marker { display: none; }
+
+  summary::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+    transform: rotate(-45deg);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  details[open] summary::before { transform: rotate(45deg); }
+
+  .step-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    width: 28px;
+    text-align: center;
+  }
+
+  .section-content {
+    padding: 0 1.25rem 1.25rem;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-content h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 1.25rem 0 0.5rem;
+  }
+
+  .section-content h3:first-child { margin-top: 0.25rem; }
+
+  .section-content p {
+    color: var(--text);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .section-content ul, .section-content ol {
+    margin: 0.5rem 0 0.75rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .section-content li {
+    margin-bottom: 0.35rem;
+    line-height: 1.55;
+  }
+
+  .section-content li strong { color: #fff; }
+
+  pre {
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.85rem 1rem;
+    overflow-x: auto;
+    margin: 0.6rem 0 0.75rem;
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+
+  code {
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+    font-size: 0.83rem;
+  }
+
+  p code, li code {
+    background: rgba(255,255,255,0.07);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.82rem;
+  }
+
+  .comment { color: #666; }
+
+  .table-wrap {
+    overflow-x: auto;
+    margin: 0.75rem 0;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+
+  th {
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    background: rgba(52, 211, 153, 0.08);
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.55rem 0.75rem;
+    border-top: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  td code { font-size: 0.8rem; }
+
+  tr:hover td { background: rgba(255,255,255,0.015); }
+
+  .highlight {
+    background: var(--accent-dim);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 0.75rem 1rem;
+    margin: 0.75rem 0;
+    font-size: 0.85rem;
+  }
+
+  .highlight strong { color: #fff; }
+
+  .info {
+    background: var(--blue-dim);
+    border-left-color: var(--blue);
+  }
+
+  .info strong { color: var(--blue); }
+
+  .warning {
+    background: var(--orange-dim);
+    border-left-color: var(--orange);
+  }
+
+  .warning strong { color: var(--orange); }
+
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin: 0.75rem 0;
+  }
+
+  .compare-card {
+    padding: 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+  }
+
+  .compare-card.bad {
+    background: rgba(255, 80, 80, 0.06);
+    border: 1px solid rgba(255, 80, 80, 0.15);
+  }
+
+  .compare-card.good {
+    background: var(--accent-dim);
+    border: 1px solid rgba(52, 211, 153, 0.15);
+  }
+
+  .compare-card h4 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+  }
+
+  .compare-card.bad h4 { color: #ff5050; }
+  .compare-card.good h4 { color: var(--accent); }
+
+  .compare-card ul { list-style: none; margin: 0; padding: 0; }
+
+  .compare-card li { padding: 0.2rem 0; font-size: 0.8rem; }
+
+  .footer {
+    text-align: center;
+    padding-top: 2rem;
+    margin-top: 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 480px) {
+    .container { padding: 1.25rem 1rem 3rem; }
+    .header h1 { font-size: 1.35rem; }
+    summary { padding: 0.85rem 1rem; font-size: 0.9rem; }
+    .section-content { padding: 0 1rem 1rem; }
+    .compare { grid-template-columns: 1fr; }
+    pre { font-size: 0.78rem; padding: 0.7rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>SSH + Tailscale</h1>
+    <p class="subtitle">A beginner's guide to secure remote access</p>
+    <div class="meta-tags">
+      <span class="tag">SSH</span>
+      <span class="tag">Tailscale</span>
+      <span class="tag">Linux / Mac / Windows</span>
+      <span class="tag">Free</span>
+    </div>
+  </div>
+
+  <div class="roadmap">
+    <span class="roadmap-step active">1. Tailscale</span>
+    <span class="roadmap-step">2. SSH Setup</span>
+    <span class="roadmap-step">3. Keys</span>
+    <span class="roadmap-step">4. Config</span>
+    <span class="roadmap-step">5. Security</span>
+    <span class="roadmap-step">6. Bonus</span>
+  </div>
+
+  <!-- Intro -->
+  <div class="section">
+    <details open>
+      <summary>
+        <span class="step-icon">💡</span>
+        What are SSH and Tailscale?
+      </summary>
+      <div class="section-content">
+        <h3>SSH (Secure Shell)</h3>
+        <p>A secure way to remotely connect to another computer via the terminal. All traffic is encrypted. Used for server management, file transfers, and tunneling.</p>
+
+        <h3>Tailscale</h3>
+        <p>A VPN service that creates your own private network from your devices — no matter where they are.</p>
+
+        <h3>The problem Tailscale solves</h3>
+        <p>Normally, SSH only works easily on the <strong>same network</strong> (both computers on the same WiFi). Remote access would require port forwarding, a static IP, or a VPN server. Tailscale handles all of this automatically.</p>
+
+        <div class="compare">
+          <div class="compare-card bad">
+            <h4>❌ Without Tailscale</h4>
+            <ul>
+              <li>Only works on same network</li>
+              <li>Requires router port forwarding</li>
+              <li>SSH port exposed to the internet</li>
+              <li>IP changes between networks</li>
+              <li>Doesn't work on mobile data</li>
+            </ul>
+          </div>
+          <div class="compare-card good">
+            <h4>✅ Tailscale + SSH</h4>
+            <ul>
+              <li>Works from anywhere</li>
+              <li>No ports to open</li>
+              <li>SSH only visible to your network</li>
+              <li>Tailscale IP stays the same</li>
+              <li>Works on 4G/5G too</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="highlight">
+          <strong>Why Tailscale?</strong> Free (up to 100 devices), no VPN server needed, encrypted (WireGuard-based), peer-to-peer, simple to set up.
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- Part 1: Tailscale -->
+  <div class="section">
+    <details>
+      <summary>
+        <span class="step-icon">🌐</span>
+        Part 1 — Tailscale: Your Private Network
+      </summary>
+      <div class="section-content">
+        <h3>1.1 Create an account</h3>
+        <ol>
+          <li>Go to <strong>tailscale.com</strong></li>
+          <li>Click "Get Started"</li>
+          <li>Sign in with Google, Microsoft, or GitHub</li>
+        </ol>
+
+        <h3>1.2 Install</h3>
+        <p><strong>Ubuntu/Debian:</strong></p>
+        <pre><code><span class="comment"># Add Tailscale repo and install</span>
+curl -fsSL https://tailscale.com/install.sh | sh</code></pre>
+
+        <p><strong>Mac:</strong></p>
+        <pre><code><span class="comment"># From the App Store: search "Tailscale", or:</span>
+brew install --cask tailscale</code></pre>
+
+        <p><strong>Windows:</strong> Download the installer from <code>tailscale.com/download/windows</code></p>
+
+        <h3>1.3 Start and log in</h3>
+        <pre><code>sudo tailscale up</code></pre>
+        <p>A link will appear in the terminal — open it in your browser and log in. Your machine will join your network.</p>
+
+        <h3>1.4 Verify the connection</h3>
+        <p>Repeat on the other machine (install + <code>sudo tailscale up</code>). Then:</p>
+        <pre><code><span class="comment"># List all machines on your network</span>
+tailscale status
+
+<span class="comment"># Example output:</span>
+100.64.1.1    home-pc       user@gmail.com  linux
+100.64.1.2    work-laptop   user@gmail.com  macos</code></pre>
+
+        <h3>1.5 Test it</h3>
+        <pre><code><span class="comment"># Ping your other machine</span>
+ping 100.64.1.1
+
+<span class="comment"># Or use the machine name (MagicDNS):</span>
+ping home-pc</code></pre>
+
+        <div class="highlight info">
+          <strong>Tip:</strong> Tailscale sets up DNS names automatically. You can use machine names instead of IP addresses.
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- Part 2: SSH -->
+  <div class="section">
+    <details>
+      <summary>
+        <span class="step-icon">🔗</span>
+        Part 2 — Setting Up SSH
+      </summary>
+      <div class="section-content">
+        <h3>2.1 Check if SSH is installed</h3>
+        <pre><code>ssh -V
+<span class="comment"># If you see a version (e.g. OpenSSH_9.x), SSH is installed</span></code></pre>
+
+        <p>If not, install it:</p>
+        <p><strong>Ubuntu/Debian:</strong></p>
+        <pre><code>sudo apt update && sudo apt install openssh-client openssh-server -y</code></pre>
+
+        <p><strong>Mac:</strong> SSH client comes pre-installed. For the server: System Settings → General → Sharing → Remote Login.</p>
+
+        <p><strong>Windows</strong> (PowerShell as admin):</p>
+        <pre><code>Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+Start-Service sshd
+Set-Service -Name sshd -StartupType Automatic</code></pre>
+
+        <h3>2.2 Start the SSH server</h3>
+        <p>Do this on the machine you want to connect <strong>to</strong>:</p>
+        <pre><code><span class="comment"># Check if SSH server is running</span>
+sudo systemctl status ssh
+
+<span class="comment"># Start it</span>
+sudo systemctl start ssh
+
+<span class="comment"># Start automatically on boot</span>
+sudo systemctl enable ssh</code></pre>
+
+        <div class="highlight info">
+          <strong>What's systemctl?</strong> Linux's service manager. <code>enable</code> = start automatically on boot, <code>start</code> = start now.
+        </div>
+
+        <h3>2.3 Connect!</h3>
+        <pre><code>ssh username@tailscale-ip
+
+<span class="comment"># Example:</span>
+ssh john@100.64.1.1
+<span class="comment"># Or with the machine name:</span>
+ssh john@home-pc</code></pre>
+
+        <p>On the first connection, SSH will ask if you trust the machine — type <code>yes</code>. This is normal.</p>
+
+        <div class="highlight warning">
+          <strong>Note:</strong> When typing your password, nothing appears on screen — not even asterisks. This is normal. Just type it and press Enter.
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- Part 3: SSH Keys -->
+  <div class="section">
+    <details>
+      <summary>
+        <span class="step-icon">🔑</span>
+        Part 3 — SSH Keys (Passwordless Login)
+      </summary>
+      <div class="section-content">
+        <p>Typing your password every time is tedious. SSH keys solve this.</p>
+
+        <h3>3.1 Generate a key pair</h3>
+        <p>On the machine you're connecting <strong>from</strong>:</p>
+        <pre><code>ssh-keygen -t ed25519
+
+<span class="comment"># It asks where to save → press Enter (default is fine)</span>
+<span class="comment"># It asks for a passphrase → you can leave it empty or set one</span></code></pre>
+
+        <div class="highlight info">
+          <strong>What happened?</strong> Two files were created:
+          <br>• <code>~/.ssh/id_ed25519</code> — private key (NEVER share this with anyone!)
+          <br>• <code>~/.ssh/id_ed25519.pub</code> — public key (this one gets shared)
+          <br><br>Think of it like a lock and a key. The public key is a lock you place on the target machine. The private key is the only key that opens it.
+        </div>
+
+        <h3>3.2 Copy the public key to the target machine</h3>
+        <pre><code>ssh-copy-id john@home-pc
+
+<span class="comment"># Enter your password one last time!</span></code></pre>
+
+        <p>After that:</p>
+        <pre><code>ssh john@home-pc
+<span class="comment"># No password prompt! 🎉</span></code></pre>
+      </div>
+    </details>
+  </div>
+
+  <!-- Part 4: SSH Config -->
+  <div class="section">
+    <details>
+      <summary>
+        <span class="step-icon">⚙️</span>
+        Part 4 — SSH Config (Shortcuts)
+      </summary>
+      <div class="section-content">
+        <p>Make connections even easier. Open the config file:</p>
+        <pre><code>nano ~/.ssh/config</code></pre>
+
+        <div class="highlight info">
+          <strong>nano</strong> is a simple terminal text editor. Edit normally, save with <code>Ctrl+O</code> → Enter, exit with <code>Ctrl+X</code>.
+        </div>
+
+        <p>Add:</p>
+        <pre><code>Host home
+    HostName home-pc
+    User john</code></pre>
+
+        <p>Now you can connect with just:</p>
+        <pre><code>ssh home</code></pre>
+
+        <h3>Multiple machines?</h3>
+        <pre><code>Host home
+    HostName home-pc
+    User john
+
+Host work
+    HostName work-laptop
+    User john
+    Port 2222
+
+Host raspi
+    HostName raspberry-pi
+    User pi</code></pre>
+      </div>
+    </details>
+  </div>
+
+  <!-- Part 5: Security -->
+  <div class="section">
+    <details>
+      <summary>
+        <span class="step-icon">🛡️</span>
+        Part 5 — Basic Security
+      </summary>
+      <div class="section-content">
+        <p>Edit SSH settings on the target machine:</p>
+        <pre><code>sudo nano /etc/ssh/sshd_config</code></pre>
+
+        <h3>5.1 Change the port (optional)</h3>
+        <p>Default port 22 is the first thing attackers scan for:</p>
+        <pre><code><span class="comment"># Find the line #Port 22, remove # and change:</span>
+Port 2222</code></pre>
+
+        <div class="highlight info">
+          <strong>Note:</strong> With Tailscale, this is less critical since your SSH port isn't directly exposed to the internet — but it doesn't hurt either.
+        </div>
+
+        <h3>5.2 Disable root login</h3>
+        <pre><code>PermitRootLogin no</code></pre>
+        <p>Root is the "god user" with full access. Always log in with your own account and use <code>sudo</code> when needed.</p>
+
+        <h3>5.3 Disable password authentication</h3>
+        <pre><code>PasswordAuthentication no</code></pre>
+
+        <div class="highlight warning">
+          <strong>⚠️ Only do this after confirming your SSH keys work!</strong> Otherwise you'll lock yourself out.
+        </div>
+
+        <h3>5.4 Apply changes</h3>
+        <pre><code>sudo systemctl restart ssh</code></pre>
+      </div>
+    </details>
+  </div>
+
+  <!-- Part 6: Tailscale SSH -->
+  <div class="section">
+    <details>
+      <summary>
+        <span class="step-icon">✨</span>
+        Part 6 — Tailscale SSH (Bonus)
+      </summary>
+      <div class="section-content">
+        <p>Tailscale also offers its own SSH alternative that bypasses traditional SSH entirely. No SSH server, keys, or configuration needed.</p>
+
+        <pre><code><span class="comment"># On the target machine: enable Tailscale SSH</span>
+sudo tailscale set --ssh
+
+<span class="comment"># Then from another machine:</span>
+ssh home-pc
+<span class="comment"># No password, no keys — Tailscale handles everything!</span></code></pre>
+
+        <div class="highlight">
+          The easiest option, but requires trusting Tailscale with authentication. Traditional SSH + keys gives you more control.
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- Cheat Sheet -->
+  <div class="section">
+    <details>
+      <summary>
+        <span class="step-icon">📋</span>
+        Cheat Sheet — Quick Commands
+      </summary>
+      <div class="section-content">
+        <h3>Tailscale</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>What it does</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>sudo tailscale up</code></td><td>Connect to your network</td></tr>
+              <tr><td><code>tailscale status</code></td><td>List machines and IPs</td></tr>
+              <tr><td><code>tailscale ip</code></td><td>Show your Tailscale IP</td></tr>
+              <tr><td><code>sudo tailscale down</code></td><td>Disconnect</td></tr>
+              <tr><td><code>sudo tailscale set --ssh</code></td><td>Enable Tailscale SSH</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>SSH</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>What it does</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>ssh user@ip</code></td><td>Connect to a machine</td></tr>
+              <tr><td><code>ssh -p 2222 user@ip</code></td><td>Connect on a different port</td></tr>
+              <tr><td><code>ssh-keygen -t ed25519</code></td><td>Generate a key pair</td></tr>
+              <tr><td><code>ssh-copy-id user@ip</code></td><td>Copy public key to target</td></tr>
+              <tr><td><code>scp file.txt user@ip:~/</code></td><td>Copy file to a machine</td></tr>
+              <tr><td><code>scp user@ip:~/file.txt .</code></td><td>Copy file from a machine</td></tr>
+              <tr><td><code>exit</code></td><td>Close the connection</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- Troubleshooting -->
+  <div class="section">
+    <details>
+      <summary>
+        <span class="step-icon">🔧</span>
+        Troubleshooting
+      </summary>
+      <div class="section-content">
+        <h3>SSH issues</h3>
+        <ul>
+          <li><strong>"Connection refused"</strong> → SSH server isn't running. Run <code>sudo systemctl start ssh</code></li>
+          <li><strong>"Connection timed out"</strong> → Wrong IP or firewall blocking. Check <code>tailscale status</code></li>
+          <li><strong>"Permission denied"</strong> → Wrong username or password</li>
+          <li><strong>"Host key verification failed"</strong> → Machine's key changed (e.g. OS reinstall). Fix: <code>ssh-keygen -R ip-address</code></li>
+        </ul>
+
+        <h3>Tailscale issues</h3>
+        <ul>
+          <li><strong>Machine doesn't appear</strong> → Is Tailscale running? <code>sudo tailscale up</code></li>
+          <li><strong>Timeout</strong> → Firewall: <code>sudo ufw allow in on tailscale0</code></li>
+          <li><strong>Machines visible but SSH fails</strong> → SSH server not installed on the target machine</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+
+  <!-- Recommended order -->
+  <div class="section">
+    <details>
+      <summary>
+        <span class="step-icon">🎯</span>
+        Recommended Order
+      </summary>
+      <div class="section-content">
+        <ol>
+          <li><strong>Install Tailscale on both machines</strong> (Part 1)</li>
+          <li><strong>Install SSH server on the target machine</strong> (Part 2)</li>
+          <li><strong>Connect via SSH through Tailscale</strong> (Part 2.3)</li>
+          <li><strong>Set up SSH keys</strong> (Part 3) — no password every time</li>
+          <li><strong>Create an SSH config</strong> (Part 4) — connect with one word</li>
+          <li><strong>Harden security</strong> (Part 5) — once everything works</li>
+        </ol>
+
+        <div class="highlight">
+          Don't try everything at once. Do one step, test it, then move on to the next.
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <div class="footer">
+    <p>SSH + Tailscale Guide · 2026</p>
+  </div>
+
+</div>
+</body>
+</html>
