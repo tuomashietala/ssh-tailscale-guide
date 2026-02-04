@@ -397,7 +397,11 @@
         <p>A secure way to remotely connect to another computer via the terminal. All traffic is encrypted. Used for server management, file transfers, and tunneling.</p>
 
         <h3>Tailscale</h3>
-        <p>A VPN service that creates your own private network from your devices — no matter where they are.</p>
+        <p>Tailscale creates your own private network from your devices — no matter where they are.</p>
+
+        <div class="highlight info">
+          <strong>Tailscale is called a "VPN" but it's not what you might think.</strong> Traditional VPNs (like NordVPN or ExpressVPN) route all your internet traffic through a remote server to hide your IP or bypass geo-blocks. Tailscale doesn't do that. It only connects <em>your own devices</em> to each other directly (peer-to-peer), creating a private network between them. Your regular internet traffic stays unchanged. Think of it as a secure tunnel between your machines, not a privacy proxy for browsing.
+        </div>
 
         <h3>The problem Tailscale solves</h3>
         <p>Normally, SSH only works easily on the <strong>same network</strong> (both computers on the same WiFi). Remote access would require port forwarding, a static IP, or a VPN server. Tailscale handles all of this automatically.</p>
