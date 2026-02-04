@@ -776,8 +776,26 @@ sudo ufw allow in on tailscale0</code></pre>
         </div>
 
         <h3>Mac &amp; Windows</h3>
-        <p><strong>Mac:</strong> macOS has a built-in firewall in System Settings → Network → Firewall. It blocks incoming connections by default when enabled. For Tailscale, no extra config needed — it works through the firewall automatically.</p>
-        <p><strong>Windows:</strong> Windows Defender Firewall is on by default. Tailscale configures itself automatically. If SSH isn't working, check Windows Firewall settings and ensure the OpenSSH Server is allowed through.</p>
+        <p>UFW is Linux-only. Here's what to do on other systems:</p>
+
+        <p><strong>Mac:</strong></p>
+        <ol>
+          <li>Open <strong>System Settings → Network → Firewall</strong></li>
+          <li>Toggle it <strong>on</strong> if it isn't already</li>
+          <li>Click <strong>Options</strong> to see which apps are allowed through</li>
+          <li>Tailscale handles its own firewall rules automatically — no extra config needed</li>
+          <li>If you're running an SSH server (Remote Login), macOS allows it through automatically when you enable it in Sharing settings</li>
+        </ol>
+
+        <p><strong>Windows:</strong></p>
+        <ol>
+          <li>Windows Defender Firewall is <strong>on by default</strong> — you don't need to enable it</li>
+          <li>Tailscale configures its own firewall rules automatically during installation</li>
+          <li>If SSH isn't working after installing OpenSSH Server, you may need to allow it manually:</li>
+        </ol>
+        <pre><code><span class="comment"># Run in PowerShell as admin:</span>
+New-NetFirewallRule -Name "SSH" -DisplayName "OpenSSH Server" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 2222</code></pre>
+        <p>Change <code>2222</code> to whatever port you chose in Part 5.</p>
       </div>
     </details>
   </div>
