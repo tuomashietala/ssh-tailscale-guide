@@ -746,16 +746,20 @@ sudo ufw allow in on tailscale0</code></pre>
         </div>
 
         <h3>6.6 Verify</h3>
-        <pre><code>sudo ufw status verbose
-
-<span class="comment"># Expected output:</span>
-Status: active
-Default: deny (incoming), allow (outgoing), disabled (routed)
-
-To                         Action      From
---                         ------      ----
-22/tcp                     ALLOW IN    Anywhere
-Anywhere on tailscale0     ALLOW IN    Anywhere</code></pre>
+        <pre><code>sudo ufw status</code></pre>
+        <p>You should see something like this:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>To</th><th>Action</th><th>From</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>22/tcp</code></td><td>ALLOW IN</td><td>Anywhere</td></tr>
+              <tr><td><code>Anywhere on tailscale0</code></td><td>ALLOW IN</td><td>Anywhere</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Status should say <strong>active</strong>. If you see these two rules, your firewall is correctly configured.</p>
 
         <h3>Useful UFW commands</h3>
         <div class="table-wrap">
