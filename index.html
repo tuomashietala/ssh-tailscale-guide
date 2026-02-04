@@ -438,6 +438,10 @@
         Part 1 — Tailscale: Your Private Network
       </summary>
       <div class="section-content">
+        <div class="highlight">
+          <strong>Goal:</strong> By the end of this part, both of your machines will be on the same private network and able to see each other — from anywhere in the world.
+        </div>
+
         <h3>1.1 Create an account</h3>
         <ol>
           <li>Go to <strong>tailscale.com</strong></li>
@@ -491,6 +495,10 @@ ping home-pc</code></pre>
         Part 2 — Setting Up SSH
       </summary>
       <div class="section-content">
+        <div class="highlight">
+          <strong>Goal:</strong> By the end of this part, you'll be able to open a terminal on your computer and remotely control another machine via the command line.
+        </div>
+
         <h3>2.1 Check if SSH is installed</h3>
         <pre><code>ssh -V
 <span class="comment"># If you see a version (e.g. OpenSSH_9.x), SSH is installed</span></code></pre>
@@ -548,6 +556,10 @@ Are you sure you want to continue connecting (yes/no/[fingerprint])?</code></pre
         Part 3 — SSH Keys (Passwordless Login)
       </summary>
       <div class="section-content">
+        <div class="highlight">
+          <strong>Goal:</strong> By the end of this part, you'll be able to connect to your machine without typing a password — using cryptographic keys that are both more convenient and more secure.
+        </div>
+
         <p>Typing your password every time is tedious. SSH keys solve this.</p>
 
         <h3>3.1 Generate a key pair</h3>
@@ -588,6 +600,10 @@ Are you sure you want to continue connecting (yes/no/[fingerprint])?</code></pre
         Part 4 — SSH Config (Shortcuts)
       </summary>
       <div class="section-content">
+        <div class="highlight">
+          <strong>Goal:</strong> By the end of this part, you'll connect to any machine by typing just <code>ssh home</code> — a single short command instead of remembering usernames and IPs.
+        </div>
+
         <p>Instead of typing <code>ssh john@home-pc</code> every time, you can create shortcuts. Open (or create) the config file:</p>
         <pre><code>nano ~/.ssh/config</code></pre>
         <p>If the file doesn't exist yet, that's fine — <code>nano</code> will create it for you.</p>
@@ -629,6 +645,10 @@ Host raspi
         Part 5 — Basic Security
       </summary>
       <div class="section-content">
+        <div class="highlight">
+          <strong>Goal:</strong> By the end of this part, your SSH server will be hardened against common attacks — root login disabled, password brute-forcing impossible, and optionally running on a non-standard port.
+        </div>
+
         <p>These changes are made on the <strong>target machine</strong> (the one you connect to). Open the SSH server config file:</p>
         <pre><code>sudo nano /etc/ssh/sshd_config</code></pre>
         <p>This is a long file with many settings. You'll scroll through it to find and change specific lines. Use arrow keys to navigate. Lines starting with <code>#</code> are comments (disabled). To enable a setting, remove the <code>#</code> at the start of the line.</p>
@@ -672,6 +692,10 @@ Host raspi
         Part 6 — Firewall Setup (UFW)
       </summary>
       <div class="section-content">
+        <div class="highlight">
+          <strong>Goal:</strong> By the end of this part, your machine will block all unwanted incoming connections while still allowing SSH and Tailscale traffic through.
+        </div>
+
         <h3>What's a firewall?</h3>
         <p>A firewall controls which network connections are allowed in and out of your machine. Think of it as a bouncer — it only lets in traffic you've approved.</p>
         <p><strong>UFW</strong> (Uncomplicated Firewall) is the default firewall tool on Ubuntu/Debian. It's a simple frontend for the powerful <code>iptables</code> system.</p>
@@ -763,6 +787,10 @@ Anywhere on tailscale0     ALLOW IN    Anywhere</code></pre>
         Part 7 — Tailscale SSH (Bonus)
       </summary>
       <div class="section-content">
+        <div class="highlight">
+          <strong>Goal:</strong> Learn about Tailscale's built-in SSH — a zero-config alternative where Tailscale handles all authentication for you. No keys, no passwords, no SSH server needed.
+        </div>
+
         <p>Tailscale also offers its own SSH alternative that bypasses traditional SSH entirely. No SSH server, keys, or configuration needed.</p>
 
         <pre><code><span class="comment"># On the target machine: enable Tailscale SSH</span>
