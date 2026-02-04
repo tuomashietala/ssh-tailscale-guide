@@ -367,7 +367,8 @@
     <a class="roadmap-step" data-target="part-3">3. Keys</a>
     <a class="roadmap-step" data-target="part-4">4. Config</a>
     <a class="roadmap-step" data-target="part-5">5. Security</a>
-    <a class="roadmap-step" data-target="part-6">6. Bonus</a>
+    <a class="roadmap-step" data-target="part-5b">6. Firewall</a>
+    <a class="roadmap-step" data-target="part-6">7. Bonus</a>
   </div>
 
   <!-- Intro -->
@@ -634,6 +635,97 @@ Port 2222</code></pre>
 
         <h3>5.4 Apply changes</h3>
         <pre><code>sudo systemctl restart ssh</code></pre>
+      </div>
+    </details>
+  </div>
+
+  <!-- Part 5b: Firewall -->
+  <div class="section" id="part-5b">
+    <details>
+      <summary>
+        <span class="step-icon">🧱</span>
+        Part 5b — Firewall Setup (UFW)
+      </summary>
+      <div class="section-content">
+        <h3>What's a firewall?</h3>
+        <p>A firewall controls which network connections are allowed in and out of your machine. Think of it as a bouncer — it only lets in traffic you've approved.</p>
+        <p><strong>UFW</strong> (Uncomplicated Firewall) is the default firewall tool on Ubuntu/Debian. It's a simple frontend for the powerful <code>iptables</code> system.</p>
+
+        <h3>5b.1 Check if UFW is installed</h3>
+        <pre><code>sudo ufw status
+<span class="comment"># If you see "inactive" or a rules list, it's installed</span>
+<span class="comment"># If not found, install it:</span>
+sudo apt install ufw -y</code></pre>
+
+        <h3>5b.2 Set default policies</h3>
+        <p>Start by blocking everything incoming and allowing everything outgoing:</p>
+        <pre><code><span class="comment"># Block all incoming connections by default</span>
+sudo ufw default deny incoming
+
+<span class="comment"># Allow all outgoing connections by default</span>
+sudo ufw default allow outgoing</code></pre>
+
+        <div class="highlight info">
+          <strong>Why?</strong> This means nothing can connect to your machine unless you explicitly allow it. Your machine can still reach the internet normally.
+        </div>
+
+        <h3>5b.3 Allow SSH</h3>
+        <pre><code><span class="comment"># If using default port 22:</span>
+sudo ufw allow ssh
+
+<span class="comment"># If you changed the port (e.g. to 2222):</span>
+sudo ufw allow 2222/tcp</code></pre>
+
+        <h3>5b.4 Allow Tailscale traffic</h3>
+        <pre><code><span class="comment"># Allow all traffic on the Tailscale interface</span>
+sudo ufw allow in on tailscale0</code></pre>
+
+        <div class="highlight info">
+          <strong>Why tailscale0?</strong> Tailscale creates its own virtual network interface. This rule ensures your Tailscale devices can talk to each other freely, while the firewall still protects you from the public internet.
+        </div>
+
+        <h3>5b.5 Enable the firewall</h3>
+        <pre><code>sudo ufw enable
+
+<span class="comment"># It will warn about disrupting SSH — type 'y' if you</span>
+<span class="comment"># already allowed SSH in the previous step</span></code></pre>
+
+        <div class="highlight warning">
+          <strong>⚠️ Important:</strong> Always allow SSH <em>before</em> enabling the firewall. If you enable it first without allowing SSH, you'll lock yourself out of a remote machine.
+        </div>
+
+        <h3>5b.6 Verify</h3>
+        <pre><code>sudo ufw status verbose
+
+<span class="comment"># Expected output:</span>
+Status: active
+Default: deny (incoming), allow (outgoing), disabled (routed)
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW IN    Anywhere
+Anywhere on tailscale0     ALLOW IN    Anywhere</code></pre>
+
+        <h3>Useful UFW commands</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>What it does</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>sudo ufw status</code></td><td>Show current rules</td></tr>
+              <tr><td><code>sudo ufw allow 80/tcp</code></td><td>Allow a specific port</td></tr>
+              <tr><td><code>sudo ufw deny 3000</code></td><td>Block a specific port</td></tr>
+              <tr><td><code>sudo ufw delete allow 80/tcp</code></td><td>Remove a rule</td></tr>
+              <tr><td><code>sudo ufw reset</code></td><td>Reset all rules to default</td></tr>
+              <tr><td><code>sudo ufw disable</code></td><td>Turn off firewall</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Mac &amp; Windows</h3>
+        <p><strong>Mac:</strong> macOS has a built-in firewall in System Settings → Network → Firewall. It blocks incoming connections by default when enabled. For Tailscale, no extra config needed — it works through the firewall automatically.</p>
+        <p><strong>Windows:</strong> Windows Defender Firewall is on by default. Tailscale configures itself automatically. If SSH isn't working, check Windows Firewall settings and ensure the OpenSSH Server is allowed through.</p>
       </div>
     </details>
   </div>
