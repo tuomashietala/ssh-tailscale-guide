@@ -99,6 +99,15 @@
     border-radius: 20px;
     color: var(--text-muted);
     white-space: nowrap;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    text-decoration: none;
+  }
+
+  .roadmap-step:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
   }
 
   .roadmap-step.active {
@@ -353,12 +362,12 @@
   </div>
 
   <div class="roadmap">
-    <span class="roadmap-step active">1. Tailscale</span>
-    <span class="roadmap-step">2. SSH Setup</span>
-    <span class="roadmap-step">3. Keys</span>
-    <span class="roadmap-step">4. Config</span>
-    <span class="roadmap-step">5. Security</span>
-    <span class="roadmap-step">6. Bonus</span>
+    <a class="roadmap-step active" data-target="part-1">1. Tailscale</a>
+    <a class="roadmap-step" data-target="part-2">2. SSH Setup</a>
+    <a class="roadmap-step" data-target="part-3">3. Keys</a>
+    <a class="roadmap-step" data-target="part-4">4. Config</a>
+    <a class="roadmap-step" data-target="part-5">5. Security</a>
+    <a class="roadmap-step" data-target="part-6">6. Bonus</a>
   </div>
 
   <!-- Intro -->
@@ -409,7 +418,7 @@
   </div>
 
   <!-- Part 1: Tailscale -->
-  <div class="section">
+  <div class="section" id="part-1">
     <details>
       <summary>
         <span class="step-icon">🌐</span>
@@ -462,7 +471,7 @@ ping home-pc</code></pre>
   </div>
 
   <!-- Part 2: SSH -->
-  <div class="section">
+  <div class="section" id="part-2">
     <details>
       <summary>
         <span class="step-icon">🔗</span>
@@ -517,7 +526,7 @@ ssh john@home-pc</code></pre>
   </div>
 
   <!-- Part 3: SSH Keys -->
-  <div class="section">
+  <div class="section" id="part-3">
     <details>
       <summary>
         <span class="step-icon">🔑</span>
@@ -553,7 +562,7 @@ ssh john@home-pc</code></pre>
   </div>
 
   <!-- Part 4: SSH Config -->
-  <div class="section">
+  <div class="section" id="part-4">
     <details>
       <summary>
         <span class="step-icon">⚙️</span>
@@ -593,7 +602,7 @@ Host raspi
   </div>
 
   <!-- Part 5: Security -->
-  <div class="section">
+  <div class="section" id="part-5">
     <details>
       <summary>
         <span class="step-icon">🛡️</span>
@@ -630,7 +639,7 @@ Port 2222</code></pre>
   </div>
 
   <!-- Part 6: Tailscale SSH -->
-  <div class="section">
+  <div class="section" id="part-6">
     <details>
       <summary>
         <span class="step-icon">✨</span>
@@ -753,5 +762,17 @@ ssh home-pc
   </div>
 
 </div>
+
+<script>
+document.querySelectorAll('.roadmap-step[data-target]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = document.getElementById(btn.dataset.target);
+    if (!target) return;
+    const details = target.querySelector('details');
+    if (details && !details.open) details.open = true;
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
 </body>
 </html>
