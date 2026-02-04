@@ -655,8 +655,8 @@ Host raspi
         <pre><code>sudo nano /etc/ssh/sshd_config</code></pre>
         <p>This is a long file with many settings. You'll scroll through it to find and change specific lines. Use arrow keys to navigate. Lines starting with <code>#</code> are comments (disabled). To enable a setting, remove the <code>#</code> at the start of the line.</p>
 
-        <h3>5.1 Change the port (optional)</h3>
-        <p>Default port 22 is the first thing attackers scan for. Scroll until you find:</p>
+        <h3>5.1 Change the port</h3>
+        <p>Default port 22 is the first thing attackers scan for. Changing it is a simple but effective defense. Scroll until you find:</p>
         <pre><code><span class="comment">#Port 22</span></code></pre>
         <p>Remove the <code>#</code> and change <code>22</code> to a different number, like <code>2222</code>:</p>
         <pre><code>Port 2222</code></pre>
@@ -721,11 +721,8 @@ sudo ufw default allow outgoing</code></pre>
         </div>
 
         <h3>6.3 Allow SSH</h3>
-        <pre><code><span class="comment"># If using default port 22:</span>
-sudo ufw allow ssh
-
-<span class="comment"># If you changed the port (e.g. to 2222):</span>
-sudo ufw allow 2222/tcp</code></pre>
+        <p>Allow the SSH port you set in Part 5 through the firewall. If you changed it to 2222 as recommended:</p>
+        <pre><code>sudo ufw allow 2222/tcp</code></pre>
 
         <h3>6.4 Allow Tailscale traffic</h3>
         <pre><code><span class="comment"># Allow all traffic on the Tailscale interface</span>
@@ -754,7 +751,7 @@ sudo ufw allow in on tailscale0</code></pre>
               <tr><th>To</th><th>Action</th><th>From</th></tr>
             </thead>
             <tbody>
-              <tr><td><code>22/tcp</code></td><td>ALLOW IN</td><td>Anywhere</td></tr>
+              <tr><td><code>2222/tcp</code></td><td>ALLOW IN</td><td>Anywhere</td></tr>
               <tr><td><code>Anywhere on tailscale0</code></td><td>ALLOW IN</td><td>Anywhere</td></tr>
             </tbody>
           </table>
