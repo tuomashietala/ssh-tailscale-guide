@@ -522,14 +522,16 @@ sudo systemctl enable ssh</code></pre>
         </div>
 
         <h3>2.3 Connect!</h3>
-        <pre><code>ssh username@tailscale-ip
-
-<span class="comment"># Example:</span>
-ssh john@100.64.1.1
+        <p>Run this on the machine you're connecting <strong>from</strong> (your laptop, for example). Replace <code>john</code> with the actual username on the target machine, and replace the IP with the one you saw in <code>tailscale status</code>:</p>
+        <pre><code>ssh john@100.64.1.1
 <span class="comment"># Or with the machine name:</span>
 ssh john@home-pc</code></pre>
 
-        <p>On the first connection, SSH will ask if you trust the machine — type <code>yes</code>. This is normal.</p>
+        <p>On the first connection, you'll see something like this:</p>
+        <pre><code>The authenticity of host '100.64.1.1' can't be established.
+ED25519 key fingerprint is SHA256:abc123...
+Are you sure you want to continue connecting (yes/no/[fingerprint])?</code></pre>
+        <p>Type <code>yes</code> and press Enter. This is normal — SSH is verifying the target machine's identity. You'll only see this once per machine.</p>
 
         <div class="highlight warning">
           <strong>Note:</strong> When typing your password, nothing appears on screen — not even asterisks. This is normal. Just type it and press Enter.
@@ -563,13 +565,17 @@ ssh john@home-pc</code></pre>
         </div>
 
         <h3>3.2 Copy the public key to the target machine</h3>
+        <p>Replace <code>john@home-pc</code> with your actual username and machine name/IP from earlier steps:</p>
         <pre><code>ssh-copy-id john@home-pc
 
-<span class="comment"># Enter your password one last time!</span></code></pre>
+<span class="comment"># It will ask for your password — enter it one last time.</span>
+<span class="comment"># This copies your public key to the target machine's</span>
+<span class="comment"># ~/.ssh/authorized_keys file automatically.</span></code></pre>
 
-        <p>After that:</p>
+        <h3>3.3 Test it</h3>
         <pre><code>ssh john@home-pc
 <span class="comment"># No password prompt! 🎉</span></code></pre>
+        <p>If it still asks for a password, check that the key was copied correctly: <code>ssh -v john@home-pc</code> (verbose mode shows what's happening).</p>
       </div>
     </details>
   </div>
@@ -582,19 +588,20 @@ ssh john@home-pc</code></pre>
         Part 4 — SSH Config (Shortcuts)
       </summary>
       <div class="section-content">
-        <p>Make connections even easier. Open the config file:</p>
+        <p>Instead of typing <code>ssh john@home-pc</code> every time, you can create shortcuts. Open (or create) the config file:</p>
         <pre><code>nano ~/.ssh/config</code></pre>
+        <p>If the file doesn't exist yet, that's fine — <code>nano</code> will create it for you.</p>
 
         <div class="highlight info">
-          <strong>nano</strong> is a simple terminal text editor. Edit normally, save with <code>Ctrl+O</code> → Enter, exit with <code>Ctrl+X</code>.
+          <strong>nano</strong> is a simple terminal text editor. Type normally to add text. Save with <code>Ctrl+O</code> → Enter, exit with <code>Ctrl+X</code>. Arrow keys to move around.
         </div>
 
-        <p>Add:</p>
+        <p>Paste the following into the file. Replace <code>home-pc</code> with your target machine's Tailscale name (from <code>tailscale status</code>), and <code>john</code> with the username you use to log in:</p>
         <pre><code>Host home
     HostName home-pc
     User john</code></pre>
 
-        <p>Now you can connect with just:</p>
+        <p>Save the file (<code>Ctrl+O</code> → Enter → <code>Ctrl+X</code>). Now you can connect with just:</p>
         <pre><code>ssh home</code></pre>
 
         <h3>Multiple machines?</h3>
@@ -622,30 +629,36 @@ Host raspi
         Part 5 — Basic Security
       </summary>
       <div class="section-content">
-        <p>Edit SSH settings on the target machine:</p>
+        <p>These changes are made on the <strong>target machine</strong> (the one you connect to). Open the SSH server config file:</p>
         <pre><code>sudo nano /etc/ssh/sshd_config</code></pre>
+        <p>This is a long file with many settings. You'll scroll through it to find and change specific lines. Use arrow keys to navigate. Lines starting with <code>#</code> are comments (disabled). To enable a setting, remove the <code>#</code> at the start of the line.</p>
 
         <h3>5.1 Change the port (optional)</h3>
-        <p>Default port 22 is the first thing attackers scan for:</p>
-        <pre><code><span class="comment"># Find the line #Port 22, remove # and change:</span>
-Port 2222</code></pre>
+        <p>Default port 22 is the first thing attackers scan for. Scroll until you find:</p>
+        <pre><code><span class="comment">#Port 22</span></code></pre>
+        <p>Remove the <code>#</code> and change <code>22</code> to a different number, like <code>2222</code>:</p>
+        <pre><code>Port 2222</code></pre>
 
         <div class="highlight info">
-          <strong>Note:</strong> With Tailscale, this is less critical since your SSH port isn't directly exposed to the internet — but it doesn't hurt either.
+          <strong>Note:</strong> With Tailscale, this is less critical since your SSH port isn't directly exposed to the internet — but it doesn't hurt either. If you change the port, you'll need to use <code>ssh -p 2222 john@home-pc</code> to connect (or add <code>Port 2222</code> to your SSH config from Part 4).
         </div>
 
         <h3>5.2 Disable root login</h3>
+        <p>Find the line that says <code>#PermitRootLogin</code> (or <code>PermitRootLogin yes</code>) and change it to:</p>
         <pre><code>PermitRootLogin no</code></pre>
         <p>Root is the "god user" with full access. Always log in with your own account and use <code>sudo</code> when needed.</p>
 
         <h3>5.3 Disable password authentication</h3>
+        <p>Find the line <code>#PasswordAuthentication yes</code> and change it to:</p>
         <pre><code>PasswordAuthentication no</code></pre>
+        <p>This forces key-based login only — much more secure than passwords.</p>
 
         <div class="highlight warning">
-          <strong>⚠️ Only do this after confirming your SSH keys work!</strong> Otherwise you'll lock yourself out.
+          <strong>⚠️ Only do this after confirming your SSH keys work!</strong> Before saving, open a <em>second terminal</em> and test <code>ssh john@home-pc</code>. If it lets you in without a password, you're safe to save. If not, don't disable password auth yet — go back to Part 3.
         </div>
 
         <h3>5.4 Apply changes</h3>
+        <p>Save the file (<code>Ctrl+O</code> → Enter → <code>Ctrl+X</code>), then restart the SSH server:</p>
         <pre><code>sudo systemctl restart ssh</code></pre>
       </div>
     </details>
@@ -663,13 +676,13 @@ Port 2222</code></pre>
         <p>A firewall controls which network connections are allowed in and out of your machine. Think of it as a bouncer — it only lets in traffic you've approved.</p>
         <p><strong>UFW</strong> (Uncomplicated Firewall) is the default firewall tool on Ubuntu/Debian. It's a simple frontend for the powerful <code>iptables</code> system.</p>
 
-        <h3>5b.1 Check if UFW is installed</h3>
+        <h3>6.1 Check if UFW is installed</h3>
         <pre><code>sudo ufw status
 <span class="comment"># If you see "inactive" or a rules list, it's installed</span>
 <span class="comment"># If not found, install it:</span>
 sudo apt install ufw -y</code></pre>
 
-        <h3>5b.2 Set default policies</h3>
+        <h3>6.2 Set default policies</h3>
         <p>Start by blocking everything incoming and allowing everything outgoing:</p>
         <pre><code><span class="comment"># Block all incoming connections by default</span>
 sudo ufw default deny incoming
@@ -681,14 +694,14 @@ sudo ufw default allow outgoing</code></pre>
           <strong>Why?</strong> This means nothing can connect to your machine unless you explicitly allow it. Your machine can still reach the internet normally.
         </div>
 
-        <h3>5b.3 Allow SSH</h3>
+        <h3>6.3 Allow SSH</h3>
         <pre><code><span class="comment"># If using default port 22:</span>
 sudo ufw allow ssh
 
 <span class="comment"># If you changed the port (e.g. to 2222):</span>
 sudo ufw allow 2222/tcp</code></pre>
 
-        <h3>5b.4 Allow Tailscale traffic</h3>
+        <h3>6.4 Allow Tailscale traffic</h3>
         <pre><code><span class="comment"># Allow all traffic on the Tailscale interface</span>
 sudo ufw allow in on tailscale0</code></pre>
 
@@ -696,7 +709,7 @@ sudo ufw allow in on tailscale0</code></pre>
           <strong>Why tailscale0?</strong> Tailscale creates its own virtual network interface. This rule ensures your Tailscale devices can talk to each other freely, while the firewall still protects you from the public internet.
         </div>
 
-        <h3>5b.5 Enable the firewall</h3>
+        <h3>6.5 Enable the firewall</h3>
         <pre><code>sudo ufw enable
 
 <span class="comment"># It will warn about disrupting SSH — type 'y' if you</span>
@@ -706,7 +719,7 @@ sudo ufw allow in on tailscale0</code></pre>
           <strong>⚠️ Important:</strong> Always allow SSH <em>before</em> enabling the firewall. If you enable it first without allowing SSH, you'll lock yourself out of a remote machine.
         </div>
 
-        <h3>5b.6 Verify</h3>
+        <h3>6.6 Verify</h3>
         <pre><code>sudo ufw status verbose
 
 <span class="comment"># Expected output:</span>
