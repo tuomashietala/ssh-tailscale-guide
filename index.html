@@ -367,8 +367,8 @@
     <a class="roadmap-step" data-target="part-3">3. Keys</a>
     <a class="roadmap-step" data-target="part-4">4. Config</a>
     <a class="roadmap-step" data-target="part-5">5. Security</a>
-    <a class="roadmap-step" data-target="part-5b">6. Firewall</a>
-    <a class="roadmap-step" data-target="part-6">7. Bonus</a>
+    <a class="roadmap-step" data-target="part-6">6. Firewall</a>
+    <a class="roadmap-step" data-target="part-7">7. Bonus</a>
   </div>
 
   <!-- Intro -->
@@ -639,12 +639,12 @@ Port 2222</code></pre>
     </details>
   </div>
 
-  <!-- Part 5b: Firewall -->
-  <div class="section" id="part-5b">
+  <!-- Part 6: Firewall -->
+  <div class="section" id="part-6">
     <details>
       <summary>
         <span class="step-icon">🧱</span>
-        Part 5b — Firewall Setup (UFW)
+        Part 6 — Firewall Setup (UFW)
       </summary>
       <div class="section-content">
         <h3>What's a firewall?</h3>
@@ -730,12 +730,12 @@ Anywhere on tailscale0     ALLOW IN    Anywhere</code></pre>
     </details>
   </div>
 
-  <!-- Part 6: Tailscale SSH -->
-  <div class="section" id="part-6">
+  <!-- Part 7: Tailscale SSH -->
+  <div class="section" id="part-7">
     <details>
       <summary>
         <span class="step-icon">✨</span>
-        Part 6 — Tailscale SSH (Bonus)
+        Part 7 — Tailscale SSH (Bonus)
       </summary>
       <div class="section-content">
         <p>Tailscale also offers its own SSH alternative that bypasses traditional SSH entirely. No SSH server, keys, or configuration needed.</p>
@@ -839,7 +839,8 @@ ssh home-pc
           <li><strong>Connect via SSH through Tailscale</strong> (Part 2.3)</li>
           <li><strong>Set up SSH keys</strong> (Part 3) — no password every time</li>
           <li><strong>Create an SSH config</strong> (Part 4) — connect with one word</li>
-          <li><strong>Harden security</strong> (Part 5) — once everything works</li>
+          <li><strong>Harden security</strong> (Part 5) — disable root, password auth</li>
+          <li><strong>Set up the firewall</strong> (Part 6) — allow SSH + Tailscale, block the rest</li>
         </ol>
 
         <div class="highlight">
