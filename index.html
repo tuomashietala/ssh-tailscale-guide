@@ -619,7 +619,7 @@ Are you sure you want to continue connecting (yes/no/[fingerprint])?</code></pre
         <p>If the file doesn't exist yet, that's fine — <code>nano</code> will create it for you.</p>
 
         <div class="highlight info">
-          <strong>nano</strong> is a simple terminal text editor. Type normally to add text. Save with <code>Ctrl+O</code> → Enter, exit with <code>Ctrl+X</code>. Arrow keys to move around.
+          <strong>nano</strong> is a simple terminal text editor. Type normally to add text. Save with <code>Ctrl+S</code> (or <code>Ctrl+O</code> → Enter), exit with <code>Ctrl+X</code>. Arrow keys to move around.
         </div>
 
         <p>Paste the following into the file. Replace <code>home-pc</code> with your target machine's Tailscale name (from <code>tailscale status</code>), and <code>john</code> with the username you use to log in:</p>
@@ -627,7 +627,7 @@ Are you sure you want to continue connecting (yes/no/[fingerprint])?</code></pre
     HostName home-pc
     User john</code></pre>
 
-        <p>Save the file (<code>Ctrl+O</code> → Enter → <code>Ctrl+X</code>). Now you can connect with just:</p>
+        <p>Save (<code>Ctrl+S</code>) and exit (<code>Ctrl+X</code>). Now you can connect with just:</p>
         <pre><code>ssh home</code></pre>
 
         <h3>Multiple machines?</h3>
@@ -688,7 +688,7 @@ Host raspi
         </div>
 
         <h3>5.4 Apply changes</h3>
-        <p>Save the file (<code>Ctrl+O</code> → Enter → <code>Ctrl+X</code>), then restart the SSH server:</p>
+        <p>Save (<code>Ctrl+S</code>) and exit (<code>Ctrl+X</code>), then restart the SSH server:</p>
         <pre><code>sudo systemctl restart ssh</code></pre>
       </div>
     </details>
