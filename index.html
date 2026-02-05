@@ -576,6 +576,10 @@ Are you sure you want to continue connecting (yes/no/[fingerprint])?</code></pre
 <span class="comment"># It asks for a passphrase → you can leave it empty or set one</span></code></pre>
 
         <div class="highlight info">
+          <strong>What's ed25519?</strong> It's the type of encryption used for your key. Ed25519 is a modern, fast, and secure algorithm — considered the best choice today. The older alternative (RSA) still works but produces larger, slower keys. Think of it like choosing between a modern deadbolt and an old padlock — both lock the door, but one is simply better.
+        </div>
+
+        <div class="highlight info">
           <strong>What happened?</strong> Two files were created:
           <br>• <code>~/.ssh/id_ed25519</code> — private key (NEVER share this with anyone!)
           <br>• <code>~/.ssh/id_ed25519.pub</code> — public key (this one gets shared)
