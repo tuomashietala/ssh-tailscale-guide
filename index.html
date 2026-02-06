@@ -836,6 +836,99 @@ ssh home-pc
     </details>
   </div>
 
+  <!-- Part 8: Fail2Ban -->
+  <div class="section" id="part-8">
+    <details>
+      <summary>
+        <span class="step-icon">🚫</span>
+        Part 8 — Fail2Ban (Bonus)
+      </summary>
+      <div class="section-content">
+        <div class="highlight">
+          <strong>Goal:</strong> Automatically ban IP addresses that repeatedly fail to log in — stopping brute-force attacks before they succeed.
+        </div>
+
+        <h3>What's Fail2Ban?</h3>
+        <p>Fail2Ban monitors your log files for failed login attempts. After too many failures from the same IP, it temporarily bans that address using your firewall. Think of it as a bouncer who kicks out anyone who keeps guessing the wrong password.</p>
+
+        <h3>8.1 Install Fail2Ban</h3>
+        <p><strong>Ubuntu/Debian:</strong></p>
+        <pre><code>sudo apt update && sudo apt install fail2ban -y</code></pre>
+
+        <h3>8.2 Create a local config</h3>
+        <p>Never edit the default config directly — create a local override instead:</p>
+        <pre><code>sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+sudo nano /etc/fail2ban/jail.local</code></pre>
+
+        <h3>8.3 Configure SSH protection</h3>
+        <p>Find the <code>[sshd]</code> section (use Ctrl+W to search in nano) and make sure it looks like this:</p>
+        <pre><code>[sshd]
+enabled = true
+port = 4422
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 5
+findtime = 10m
+bantime = 1h</code></pre>
+
+        <div class="highlight">
+          <strong>What these settings mean:</strong>
+          <ul>
+            <li><code>port = 4422</code> — the SSH port you set in Part 5</li>
+            <li><code>maxretry = 5</code> — ban after 5 failed attempts</li>
+            <li><code>findtime = 10m</code> — within a 10-minute window</li>
+            <li><code>bantime = 1h</code> — ban lasts 1 hour</li>
+          </ul>
+        </div>
+
+        <h3>8.4 Start Fail2Ban</h3>
+        <pre><code><span class="comment"># Start the service</span>
+sudo systemctl start fail2ban
+
+<span class="comment"># Enable on boot</span>
+sudo systemctl enable fail2ban
+
+<span class="comment"># Check status</span>
+sudo systemctl status fail2ban</code></pre>
+
+        <h3>8.5 Verify it's working</h3>
+        <pre><code><span class="comment"># Check SSH jail status</span>
+sudo fail2ban-client status sshd
+
+<span class="comment"># Example output:</span>
+Status for the jail: sshd
+|- Filter
+|  |- Currently failed: 0
+|  |- Total failed:     3
+|  `- File list:        /var/log/auth.log
+`- Actions
+   |- Currently banned: 0
+   |- Total banned:     1
+   `- Banned IP list:</code></pre>
+
+        <h3>Useful commands</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>What it does</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>sudo fail2ban-client status</code></td><td>Show all active jails</td></tr>
+              <tr><td><code>sudo fail2ban-client status sshd</code></td><td>Show SSH jail details</td></tr>
+              <tr><td><code>sudo fail2ban-client set sshd unbanip 1.2.3.4</code></td><td>Unban a specific IP</td></tr>
+              <tr><td><code>sudo fail2ban-client reload</code></td><td>Reload config after changes</td></tr>
+              <tr><td><code>sudo tail -f /var/log/fail2ban.log</code></td><td>Watch Fail2Ban activity</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="highlight">
+          <strong>Note:</strong> With Tailscale, brute-force attacks from the public internet aren't a concern since your SSH port isn't exposed. But Fail2Ban is still useful if you have other services, or if you ever open ports publicly.
+        </div>
+      </div>
+    </details>
+  </div>
+
   <!-- Cheat Sheet -->
   <div class="section">
     <details>
