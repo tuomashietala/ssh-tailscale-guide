@@ -638,7 +638,7 @@ Are you sure you want to continue connecting (yes/no/[fingerprint])?</code></pre
 Host work
     HostName work-laptop
     User john
-    Port 2222
+    Port 4422
 
 Host raspi
     HostName raspberry-pi
@@ -666,11 +666,11 @@ Host raspi
         <h3>5.1 Change the port</h3>
         <p>Default port 22 is the first thing attackers scan for. Changing it is a simple but effective defense. Scroll until you find:</p>
         <pre><code><span class="comment">#Port 22</span></code></pre>
-        <p>Remove the <code>#</code> and change <code>22</code> to a different number, like <code>2222</code>:</p>
-        <pre><code>Port 2222</code></pre>
+        <p>Remove the <code>#</code> and change <code>22</code> to a different number, like <code>4422</code>:</p>
+        <pre><code>Port 4422</code></pre>
 
         <div class="highlight info">
-          <strong>Note:</strong> With Tailscale, this is less critical since your SSH port isn't directly exposed to the internet — but it doesn't hurt either. If you change the port, you'll need to use <code>ssh -p 2222 john@home-pc</code> to connect (or add <code>Port 2222</code> to your SSH config from Part 4).
+          <strong>Note:</strong> With Tailscale, this is less critical since your SSH port isn't directly exposed to the internet — but it doesn't hurt either. If you change the port, you'll need to use <code>ssh -p 4422 john@home-pc</code> to connect (or add <code>Port 4422</code> to your SSH config from Part 4).
         </div>
 
         <h3>5.2 Disable root login</h3>
@@ -729,8 +729,8 @@ sudo ufw default allow outgoing</code></pre>
         </div>
 
         <h3>6.3 Allow SSH</h3>
-        <p>Allow the SSH port you set in Part 5 through the firewall. If you changed it to 2222 as recommended:</p>
-        <pre><code>sudo ufw allow 2222/tcp</code></pre>
+        <p>Allow the SSH port you set in Part 5 through the firewall. If you changed it to 4422 as recommended:</p>
+        <pre><code>sudo ufw allow 4422/tcp</code></pre>
 
         <h3>6.4 Allow Tailscale traffic</h3>
         <pre><code><span class="comment"># Allow all traffic on the Tailscale interface</span>
@@ -759,7 +759,7 @@ sudo ufw allow in on tailscale0</code></pre>
               <tr><th>To</th><th>Action</th><th>From</th></tr>
             </thead>
             <tbody>
-              <tr><td><code>2222/tcp</code></td><td>ALLOW IN</td><td>Anywhere</td></tr>
+              <tr><td><code>4422/tcp</code></td><td>ALLOW IN</td><td>Anywhere</td></tr>
               <tr><td><code>Anywhere on tailscale0</code></td><td>ALLOW IN</td><td>Anywhere</td></tr>
             </tbody>
           </table>
@@ -802,8 +802,8 @@ sudo ufw allow in on tailscale0</code></pre>
           <li>If SSH isn't working after installing OpenSSH Server, you may need to allow it manually:</li>
         </ol>
         <pre><code><span class="comment"># Run in PowerShell as admin:</span>
-New-NetFirewallRule -Name "SSH" -DisplayName "OpenSSH Server" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 2222</code></pre>
-        <p>Change <code>2222</code> to whatever port you chose in Part 5.</p>
+New-NetFirewallRule -Name "SSH" -DisplayName "OpenSSH Server" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 4422</code></pre>
+        <p>Change <code>4422</code> to whatever port you chose in Part 5.</p>
       </div>
     </details>
   </div>
@@ -868,7 +868,7 @@ ssh home-pc
             </thead>
             <tbody>
               <tr><td><code>ssh user@ip</code></td><td>Connect to a machine</td></tr>
-              <tr><td><code>ssh -p 2222 user@ip</code></td><td>Connect on a different port</td></tr>
+              <tr><td><code>ssh -p 4422 user@ip</code></td><td>Connect on a different port</td></tr>
               <tr><td><code>ssh-keygen -t ed25519</code></td><td>Generate a key pair</td></tr>
               <tr><td><code>ssh-copy-id user@ip</code></td><td>Copy public key to target</td></tr>
               <tr><td><code>scp file.txt user@ip:~/</code></td><td>Copy file to a machine</td></tr>
