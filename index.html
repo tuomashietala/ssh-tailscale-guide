@@ -851,6 +851,15 @@ ssh home-pc
         <h3>What's Fail2Ban?</h3>
         <p>Fail2Ban monitors your log files for failed login attempts. After too many failures from the same IP, it temporarily bans that address using your firewall. Think of it as a bouncer who kicks out anyone who keeps guessing the wrong password.</p>
 
+        <h3>How it works</h3>
+        <ol>
+          <li>Someone tries to log in with the wrong password</li>
+          <li>Fail2Ban sees the failed attempt in your logs</li>
+          <li>After 5 failures → their IP gets blocked by your firewall</li>
+          <li>After 1 hour → the ban lifts automatically</li>
+        </ol>
+        <p>All automatic. You don't have to do anything.</p>
+
         <h3>8.1 Install Fail2Ban</h3>
         <p><strong>Ubuntu/Debian:</strong></p>
         <pre><code>sudo apt update && sudo apt install fail2ban -y</code></pre>
